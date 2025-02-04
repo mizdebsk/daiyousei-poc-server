@@ -15,17 +15,14 @@
  */
 package io.kojan.daiyousei.poc;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.StandardProtocolFamily;
 import java.net.UnixDomainSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -74,76 +71,13 @@ class IS extends InputStream {
     }
 }
 
-class BE implements Closeable {
-    private final SocketChannel sc;
-    private ByteBuffer buf = ByteBuffer.allocate(3);
-
-    public BE(SocketChannel sc) {
-        this.sc = sc;
-    }
-
-    public void flush() throws IOException {
-        if (buf.position() > 0) {
-            buf.flip();
-            sc.write(buf);
-            buf.flip();
-        }
-    }
-
-    private void send(int b) throws IOException {
-        buf.put((byte) b);
-        if (buf.remaining() == 0) {
-            flush();
-        }
-    }
-
-    private void send(byte[] bytes) throws IOException {
-        for (byte b : bytes) {
-            send(b);
-        }
-    }
-
-    public void addInteger(Integer i) throws IOException {
-        send('i');
-        send(i.toString().getBytes(StandardCharsets.UTF_8));
-        send('e');
-    }
-
-    public void addBytes(byte[] data, int off, Integer len) throws IOException {
-        send(len.toString().getBytes(StandardCharsets.UTF_8));
-        send(':');
-        for (int i = off; i < off + len; i++) {
-            send(data[i]);
-        }
-    }
-
-    public void addUTF8(String str) throws IOException {
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        addBytes(bytes, 0, bytes.length);
-    }
-
-    public void startList() throws IOException {
-        send('l');
-    }
-
-    public void endList() throws IOException {
-        send('e');
-    }
-
-    @Override
-    public void close() throws IOException {
-        flush();
-        sc.close();
-    }
-}
-
 class OS extends OutputStream {
-    private final BE be;
+    private final BencodeEncoder be;
     private final String label;
     private byte[] buf = new byte[500];
     private int pos;
 
-    public OS(BE be, String label) {
+    public OS(BencodeEncoder be, String label) {
         this.be = be;
         this.label = label;
     }
@@ -199,7 +133,7 @@ public class Server {
 
     private static void accept(SocketChannel sc) {
         try {
-            BE be = new BE(sc);
+            BencodeEncoder be = new BencodeEncoder(sc);
             be.startList();
             be.flush();
 
