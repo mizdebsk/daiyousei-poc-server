@@ -16,7 +16,6 @@
 package io.kojan.daiyousei.poc;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.StandardProtocolFamily;
@@ -30,46 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-class IS extends InputStream {
-    private final BencodeDecoder bd;
-    private byte[] chunk = new byte[0];
-    private int pos;
-
-    public IS(BencodeDecoder bd) {
-        this.bd = bd;
-    }
-
-    @Override
-    public int read() throws IOException {
-        while (pos == chunk.length) {
-            if (!bd.hasString()) {
-                return -1;
-            }
-            bd.consume('5', ':', 's', 't', 'd', 'i', 'n');
-            chunk = bd.readBytes();
-            pos = 0;
-        }
-        System.err.println("IS read(1) return " + chunk[pos]);
-        return chunk[pos++];
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        while (pos == chunk.length) {
-            if (!bd.hasString()) {
-                return -1;
-            }
-            bd.consume('5', ':', 's', 't', 'd', 'i', 'n');
-            chunk = bd.readBytes();
-            pos = 0;
-        }
-        int n = Math.min(chunk.length - pos, len);
-        System.arraycopy(chunk, pos, b, off, n);
-        pos += n;
-        return n;
-    }
-}
 
 class OS extends OutputStream {
     private final BencodeEncoder be;
@@ -157,7 +116,7 @@ public class Server {
                         default -> null;
                     };
 
-            IS in = new IS(bd);
+            DaiyouseiInputStream in = new DaiyouseiInputStream(bd);
             PrintStream out = new PrintStream(new OS(be, "stdout"), true);
             PrintStream err = new PrintStream(new OS(be, "stderr"), true);
             try {
