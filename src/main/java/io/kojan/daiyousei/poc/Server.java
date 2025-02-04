@@ -34,94 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-class BD {
-    private final SocketChannel sc;
-    private final ByteBuffer buf = ByteBuffer.allocate(5);
-
-    public BD(SocketChannel sc) {
-        this.sc = sc;
-        buf.flip();
-    }
-
-    private void input() throws IOException {
-        if (buf.remaining() == 0) {
-            buf.flip();
-            buf.limit(buf.capacity());
-            System.err.println("Input: block, av=" + buf.limit());
-            sc.read(buf);
-            buf.flip();
-            System.err.println("Input: read " + buf.remaining());
-        }
-    }
-
-    private int peek() throws IOException {
-        input();
-        buf.mark();
-        try {
-            return buf.get();
-        } finally {
-            buf.reset();
-        }
-    }
-
-    private byte recv() throws IOException {
-        input();
-        return buf.get();
-    }
-
-    private void consume(int b) throws IOException {
-        if (recv() != b) {
-            throw new RuntimeException("Protocol error");
-        }
-    }
-
-    public void consume(int... bytes) throws IOException {
-        for (int b : bytes) {
-            consume(b);
-        }
-    }
-
-    public String readUTF8() throws IOException {
-        return new String(readBytes(), StandardCharsets.UTF_8);
-    }
-
-    public byte[] readBytes() throws IOException {
-        if (!hasString()) {
-            throw new RuntimeException("Protocol error");
-        }
-        int n = buf.get() - '0';
-        while (hasString()) {
-            n = 10 * n + buf.get() - '0';
-        }
-        consume(':');
-        byte[] bytes = new byte[n];
-        for (int i = 0; i < n; i++) {
-            bytes[i] = recv();
-        }
-        System.err.println("Read bytes: " + n);
-        return bytes;
-    }
-
-    public void readListStart() throws IOException {
-        consume('l');
-    }
-
-    public void readListEnd() throws IOException {
-        consume('e');
-    }
-
-    public boolean hasString() throws IOException {
-        int b = peek();
-        return b >= '0' && b <= '9';
-    }
-}
-
 class IS extends InputStream {
-    private final BD bd;
+    private final BencodeDecoder bd;
     private byte[] chunk = new byte[0];
     private int pos;
 
-    public IS(BD bd) {
+    public IS(BencodeDecoder bd) {
         this.bd = bd;
     }
 
@@ -285,7 +203,7 @@ public class Server {
             be.startList();
             be.flush();
 
-            BD bd = new BD(sc);
+            BencodeDecoder bd = new BencodeDecoder(sc);
             bd.readListStart();
 
             bd.consume('4', ':', 'a', 'r', 'g', 'v');
