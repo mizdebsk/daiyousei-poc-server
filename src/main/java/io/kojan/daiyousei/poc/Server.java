@@ -34,40 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-class CatApp implements Application {
-    @Override
-    public int run(
-            List<String> args,
-            Map<String, String> env,
-            Path cwd,
-            InputStream in,
-            PrintStream out,
-            PrintStream err) {
-        if (args.isEmpty()) {
-            try {
-                in.transferTo(out);
-            } catch (IOException e) {
-                err.println("cat: Error reading stdin: " + e);
-                return 1;
-            }
-        } else {
-            for (String arg : args) {
-                Path p = Path.of(arg);
-                if (!p.isAbsolute()) {
-                    p = cwd.resolve(p);
-                }
-                try (InputStream pin = Files.newInputStream(p)) {
-                    pin.transferTo(out);
-                } catch (IOException e) {
-                    err.println("cat: Error reading " + p + ": " + e);
-                    return 1;
-                }
-            }
-        }
-        return 0;
-    }
-}
-
 class WhoamiApp implements Application {
     @Override
     public int run(
