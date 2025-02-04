@@ -34,21 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-class WhoamiApp implements Application {
-    @Override
-    public int run(
-            List<String> args,
-            Map<String, String> env,
-            Path cwd,
-            InputStream in,
-            PrintStream out,
-            PrintStream err)
-            throws Throwable {
-        out.println("You are " + env.get("USER"));
-        return 0;
-    }
-}
-
 class BD {
     private final SocketChannel sc;
     private final ByteBuffer buf = ByteBuffer.allocate(5);
