@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 public class ServerTest {
 
     SocketChannel ch;
+    ByteBuffer bb = ByteBuffer.allocate(1);
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -52,7 +53,6 @@ public class ServerTest {
     }
 
     void send(int b) throws Exception {
-        ByteBuffer bb = ByteBuffer.allocate(1);
         bb.put((byte) b);
         bb.flip();
         ch.write(bb);
@@ -60,7 +60,6 @@ public class ServerTest {
     }
 
     int recv() throws Exception {
-        ByteBuffer bb = ByteBuffer.allocate(1);
         if (ch.read(bb) < 0) {
             fail("Unexpected EOF");
         }
