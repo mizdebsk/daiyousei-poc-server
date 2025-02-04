@@ -107,16 +107,6 @@ class OS extends OutputStream {
 }
 
 public class Server {
-    public static void main(String[] args) throws IOException {
-        String sockPath = System.getenv("DAIYOUSEI_UNIX_SOCKET");
-        if (sockPath == null) {
-            sockPath = "/tmp/daiyousei.socket";
-            System.err.println("DAIYOUSEI_UNIX_SOCKET was not set, defaulting to " + sockPath);
-        }
-        CountDownLatch cdl = new CountDownLatch(1);
-        runServer(Path.of(sockPath), cdl);
-    }
-
     public static void runServer(Path socketPath, CountDownLatch cdl) throws IOException {
         ServerSocketChannel socket = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
         Files.deleteIfExists(socketPath);
