@@ -16,7 +16,6 @@
 package io.kojan.daiyousei.poc;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.StandardProtocolFamily;
 import java.net.UnixDomainSocketAddress;
@@ -29,41 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-class OS extends OutputStream {
-    private final BencodeEncoder be;
-    private final String label;
-    private byte[] buf = new byte[500];
-    private int pos;
-
-    public OS(BencodeEncoder be, String label) {
-        this.be = be;
-        this.label = label;
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        buf[pos++] = (byte) b;
-        if (pos == buf.length) {
-            flush();
-        }
-    }
-
-    @Override
-    public void flush() throws IOException {
-        if (pos > 0) {
-            be.addUTF8(label);
-            be.addBytes(buf, 0, pos);
-            pos = 0;
-        }
-        be.flush();
-    }
-
-    @Override
-    public void close() throws IOException {
-        flush();
-    }
-}
 
 public class Server {
     public static void runServer(Path socketPath, CountDownLatch cdl) throws IOException {
@@ -117,8 +81,8 @@ public class Server {
                     };
 
             DaiyouseiInputStream in = new DaiyouseiInputStream(bd);
-            PrintStream out = new PrintStream(new OS(be, "stdout"), true);
-            PrintStream err = new PrintStream(new OS(be, "stderr"), true);
+            PrintStream out = new PrintStream(new DaiyouseiOutputStream(be, "stdout"), true);
+            PrintStream err = new PrintStream(new DaiyouseiOutputStream(be, "stderr"), true);
             try {
                 System.err.println("Running App: args" + args + ", env=" + env + ", cwd=" + cwd);
                 err.println("Running app: " + appName);
