@@ -34,18 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-interface App {
-    int run(
-            List<String> args,
-            Map<String, String> env,
-            Path cwd,
-            InputStream in,
-            PrintStream out,
-            PrintStream err)
-            throws Throwable;
-}
-
-class CatApp implements App {
+class CatApp implements Application {
     @Override
     public int run(
             List<String> args,
@@ -79,7 +68,7 @@ class CatApp implements App {
     }
 }
 
-class WhoamiApp implements App {
+class WhoamiApp implements Application {
     @Override
     public int run(
             List<String> args,
@@ -368,7 +357,7 @@ public class Server {
             }
             bd.readListEnd();
 
-            App app =
+            Application app =
                     switch (Path.of(appName).getFileName().toString()) {
                         case "whoami" -> new WhoamiApp();
                         case "cat" -> new CatApp();
