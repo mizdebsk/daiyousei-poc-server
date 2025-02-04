@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class ServerTest {
 
@@ -33,8 +34,8 @@ public class ServerTest {
     ByteBuffer bb = ByteBuffer.allocate(1);
 
     @BeforeEach
-    public void setUp() throws Exception {
-        Path socketPath = Path.of("/tmp/my.socket");
+    public void setUp(@TempDir Path temp) throws Exception {
+        Path socketPath = temp.resolve("my.socket");
         CountDownLatch cdl = new CountDownLatch(1);
         Thread server =
                 new Thread(
