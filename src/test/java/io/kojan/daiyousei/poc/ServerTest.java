@@ -125,6 +125,22 @@ public class ServerTest {
     }
 
     @Test
+    public void testCatNonexistent() throws Exception {
+        recv("l");
+        send("l");
+        send("4:argv", "l", "3:cat", "18:/tmp/dummy-missing", "e");
+        send("3:cwd", "4:/tmp");
+        send("3:env", "l", "e");
+        send("e");
+        recv("6:stderr", "17:Running app: cat\n");
+        recv(
+                "6:stderr",
+                "93:cat: Error reading /tmp/dummy-missing: java.nio.file.NoSuchFileException: /tmp/dummy-missing\n");
+        recv("8:exitcode", "i1e");
+        recv("e");
+    }
+
+    @Test
     public void testWhoami() throws Exception {
         recv("l");
         send("l");
