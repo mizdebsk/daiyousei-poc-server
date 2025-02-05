@@ -37,44 +37,44 @@ public class BencodeEncoder implements Closeable {
         }
     }
 
-    private void send(int b) throws IOException {
+    private void sendByte(int b) throws IOException {
         buf.put((byte) b);
         if (buf.remaining() == 0) {
             flush();
         }
     }
 
-    private void send(byte[] bytes) throws IOException {
+    private void sendBytes(byte[] bytes) throws IOException {
         for (byte b : bytes) {
-            send(b);
+            sendByte(b);
         }
     }
 
-    public void addInteger(Integer i) throws IOException {
-        send('i');
-        send(i.toString().getBytes(StandardCharsets.UTF_8));
-        send('e');
+    public void encodeInteger(Integer i) throws IOException {
+        sendByte('i');
+        sendBytes(i.toString().getBytes(StandardCharsets.UTF_8));
+        sendByte('e');
     }
 
-    public void addBytes(byte[] data, int off, Integer len) throws IOException {
-        send(len.toString().getBytes(StandardCharsets.UTF_8));
-        send(':');
+    public void encodeString(byte[] data, int off, Integer len) throws IOException {
+        sendBytes(len.toString().getBytes(StandardCharsets.UTF_8));
+        sendByte(':');
         for (int i = off; i < off + len; i++) {
-            send(data[i]);
+            sendByte(data[i]);
         }
     }
 
-    public void addUTF8(String str) throws IOException {
+    public void encodeUTF8(String str) throws IOException {
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        addBytes(bytes, 0, bytes.length);
+        encodeString(bytes, 0, bytes.length);
     }
 
-    public void startList() throws IOException {
-        send('l');
+    public void encodeListStart() throws IOException {
+        sendByte('l');
     }
 
-    public void endList() throws IOException {
-        send('e');
+    public void encodeListEnd() throws IOException {
+        sendByte('e');
     }
 
     @Override

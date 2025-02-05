@@ -33,8 +33,8 @@ public class DaiyouseiInputStream extends InputStream {
             if (!bd.hasString()) {
                 return -1;
             }
-            bd.consume('5', ':', 's', 't', 'd', 'i', 'n');
-            chunk = bd.readBytes();
+            bd.consume("stdin");
+            chunk = bd.decodeString();
             pos = 0;
         }
         System.err.println("IS read(1) return " + chunk[pos]);
@@ -47,8 +47,8 @@ public class DaiyouseiInputStream extends InputStream {
             if (!bd.hasString()) {
                 return -1;
             }
-            bd.consume('5', ':', 's', 't', 'd', 'i', 'n');
-            chunk = bd.readBytes();
+            bd.consume("stdin");
+            chunk = bd.decodeString();
             pos = 0;
         }
         int n = Math.min(chunk.length - pos, len);

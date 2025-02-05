@@ -47,31 +47,31 @@ public class Server {
     private static void accept(SocketChannel sc) {
         try {
             BencodeEncoder be = new BencodeEncoder(sc);
-            be.startList();
+            be.encodeListStart();
             be.flush();
 
             BencodeDecoder bd = new BencodeDecoder(sc);
-            bd.readListStart();
+            bd.decodeListStart();
 
-            bd.consume('4', ':', 'a', 'r', 'g', 'v');
-            bd.readListStart();
-            String appName = bd.readUTF8();
+            bd.consume("argv");
+            bd.decodeListStart();
+            String appName = bd.decodeUTF8();
             List<String> args = new ArrayList<>();
             while (bd.hasString()) {
-                args.add(bd.readUTF8());
+                args.add(bd.decodeUTF8());
             }
-            bd.readListEnd();
+            bd.decodeListEnd();
 
-            bd.consume('3', ':', 'c', 'w', 'd');
-            Path cwd = Path.of(bd.readUTF8());
+            bd.consume("cwd");
+            Path cwd = Path.of(bd.decodeUTF8());
 
-            bd.consume('3', ':', 'e', 'n', 'v');
-            bd.readListStart();
+            bd.consume("env");
+            bd.decodeListStart();
             Map<String, String> env = new LinkedHashMap<>();
             while (bd.hasString()) {
-                env.put(bd.readUTF8(), bd.readUTF8());
+                env.put(bd.decodeUTF8(), bd.decodeUTF8());
             }
-            bd.readListEnd();
+            bd.decodeListEnd();
 
             Application app =
                     switch (Path.of(appName).getFileName().toString()) {
@@ -90,9 +90,9 @@ public class Server {
                 System.err.println("App returned " + ret);
                 out.close();
                 err.close();
-                be.addUTF8("exitcode");
-                be.addInteger(ret);
-                be.endList();
+                be.encodeUTF8("exitcode");
+                be.encodeInteger(ret);
+                be.encodeListEnd();
                 be.close();
             } catch (Throwable t) {
                 t.printStackTrace(err);

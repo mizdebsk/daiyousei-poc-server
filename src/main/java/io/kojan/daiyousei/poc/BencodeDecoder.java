@@ -61,17 +61,18 @@ public class BencodeDecoder {
         }
     }
 
-    public void consume(int... bytes) throws IOException {
-        for (int b : bytes) {
+    public void consume(String str) throws IOException {
+        String s = Integer.valueOf(str.length()).toString() + ":" + str;
+        for (int b : s.getBytes(StandardCharsets.UTF_8)) {
             consume(b);
         }
     }
 
-    public String readUTF8() throws IOException {
-        return new String(readBytes(), StandardCharsets.UTF_8);
+    public String decodeUTF8() throws IOException {
+        return new String(decodeString(), StandardCharsets.UTF_8);
     }
 
-    public byte[] readBytes() throws IOException {
+    public byte[] decodeString() throws IOException {
         if (!hasString()) {
             throw new RuntimeException("Protocol error");
         }
@@ -88,11 +89,11 @@ public class BencodeDecoder {
         return bytes;
     }
 
-    public void readListStart() throws IOException {
+    public void decodeListStart() throws IOException {
         consume('l');
     }
 
-    public void readListEnd() throws IOException {
+    public void decodeListEnd() throws IOException {
         consume('e');
     }
 

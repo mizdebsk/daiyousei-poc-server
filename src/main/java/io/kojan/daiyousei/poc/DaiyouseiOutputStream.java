@@ -40,8 +40,8 @@ public class DaiyouseiOutputStream extends OutputStream {
     @Override
     public void flush() throws IOException {
         if (pos > 0) {
-            be.addUTF8(label);
-            be.addBytes(buf, 0, pos);
+            be.encodeUTF8(label);
+            be.encodeString(buf, 0, pos);
             pos = 0;
         }
         be.flush();
