@@ -80,7 +80,7 @@ public class Server {
                         default -> null;
                     };
 
-            DaiyouseiInputStream in = new DaiyouseiInputStream(bd);
+            DaiyouseiInputStream in = new DaiyouseiInputStream(bd, "stdin");
             PrintStream out = new PrintStream(new DaiyouseiOutputStream(be, "stdout"), true);
             PrintStream err = new PrintStream(new DaiyouseiOutputStream(be, "stderr"), true);
             try {

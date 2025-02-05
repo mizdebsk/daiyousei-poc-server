@@ -20,11 +20,13 @@ import java.io.InputStream;
 
 public class DaiyouseiInputStream extends InputStream {
     private final BencodeDecoder bd;
+    private final String label;
     private byte[] chunk = new byte[0];
     private int pos;
 
-    public DaiyouseiInputStream(BencodeDecoder bd) {
+    public DaiyouseiInputStream(BencodeDecoder bd, String label) {
         this.bd = bd;
+        this.label = label;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class DaiyouseiInputStream extends InputStream {
             if (!bd.hasString()) {
                 return -1;
             }
-            bd.consume("stdin");
+            bd.consume(label);
             chunk = bd.decodeString();
             pos = 0;
         }
@@ -47,7 +49,7 @@ public class DaiyouseiInputStream extends InputStream {
             if (!bd.hasString()) {
                 return -1;
             }
-            bd.consume("stdin");
+            bd.consume(label);
             chunk = bd.decodeString();
             pos = 0;
         }
